@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impact Desk — Go-Live Readiness Brief (for Rob)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @media print{ @page{ margin:12mm; } .page{ padding:0 !important; background-image:none !important; } }
+  /* Load animation starts at opacity:0; force visible so print/PDF isn't blank. */
+  .rise{ opacity:1 !important; transform:none !important; animation:none !important; }
+</style>
+</head>
+<body>
+<style>
+  :root {
+    --paper: #eceee9;
+    --paper-raised: #f7f8f4;
+    --ink: #18201c;
+    --ink-soft: #48504a;
+    --ink-faint: #838b83;
+    --line: #d8ddd4;
+    --line-strong: #c3cabf;
+
+    --green: #2f5d4f;        /* built / ready / go */
+    --green-soft: #dae7df;
+    --clay: #a5432a;         /* the one pending dependency + open decisions */
+    --clay-soft: #f0dcd3;
+    --amber: #8a6416;        /* estimate / verify */
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --measure: 66ch;
+  }
+
+  * { box-sizing: border-box; }
+
+  .page {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(1.5rem, 5vw, 5rem) 1.25rem 6rem;
+    /* faint operational grid, evergreen-biased */
+    background-image:
+      linear-gradient(rgba(47, 93, 79, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(47, 93, 79, 0.035) 1px, transparent 1px);
+    background-size: 34px 34px;
+    background-position: -1px -1px;
+  }
+
+  .doc {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3.25rem;
+  }
+
+  .prose { max-width: var(--measure); }
+
+  /* ---- typography ---- */
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2.1rem, 5.5vw, 3.15rem); line-height: 1.06; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(1.5rem, 3.5vw, 1.95rem); line-height: 1.12; }
+  h3 { font-size: 1.16rem; line-height: 1.25; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .lede { font-size: clamp(1.12rem, 2.4vw, 1.32rem); line-height: 1.5; color: var(--ink-soft); }
+  strong { color: var(--ink); font-weight: 600; }
+  .nums { font-variant-numeric: tabular-nums; }
+
+  /* ---- header ---- */
+  header { display: flex; flex-direction: column; gap: 1.25rem; }
+  .titleblock { display: flex; flex-direction: column; gap: 1rem; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem;
+    padding-top: 1rem; border-top: 1px solid var(--line-strong);
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint);
+  }
+  .meta b { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---- section scaffold ---- */
+  section { display: flex; flex-direction: column; gap: 1.25rem; }
+  .sec-head { display: flex; align-items: baseline; gap: 0.9rem; }
+  .sec-num {
+    font-family: var(--font-mono); font-size: 0.8rem; color: var(--green);
+    border: 1px solid var(--green); border-radius: 999px;
+    width: 1.9rem; height: 1.9rem; flex: none;
+    display: grid; place-items: center; font-weight: 600;
+    transform: translateY(-2px);
+  }
+
+  /* ---- readiness board ---- */
+  .board {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .cell { background: var(--paper-raised); padding: 1.1rem 1.15rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .cell .k { font-size: 0.92rem; color: var(--ink-soft); }
+  .status { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 999px; flex: none; }
+  .ready { color: var(--green); }
+  .ready::before { background: var(--green); }
+  .pending { color: var(--clay); }
+  .pending::before { background: var(--clay); box-shadow: 0 0 0 3px var(--clay-soft); }
+
+  /* ---- the one dependency callout ---- */
+  .keystone {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-left: 4px solid var(--clay);
+    border-radius: 12px;
+    padding: clamp(1.4rem, 3vw, 2rem);
+    display: flex; flex-direction: column; gap: 0.9rem;
+  }
+  .keystone .tag { color: var(--clay); }
+
+  /* ---- tables ---- */
+  .scroll-x { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; background: var(--paper-raised); }
+  th, td { text-align: left; padding: 0.72rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; background: var(--paper); }
+  tbody tr:last-child td { border-bottom: none; }
+  td .field { font-family: var(--font-mono); font-size: 0.86rem; color: var(--ink); }
+  .pri { display: inline-block; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .pri.crit { color: var(--clay); background: var(--clay-soft); }
+  .pri.high { color: var(--green); background: var(--green-soft); }
+  .pri.opt  { color: var(--ink-faint); background: var(--paper); border: 1px solid var(--line-strong); }
+  .fit-best { color: var(--green); font-weight: 600; }
+  .fit-no { color: var(--clay); font-weight: 600; }
+
+  /* ---- lists ---- */
+  .checks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+  .checks li { display: flex; gap: 0.8rem; align-items: flex-start; }
+  .checks .marker { font-family: var(--font-mono); font-size: 0.72rem; color: var(--clay); font-weight: 700; border: 1px solid var(--clay); border-radius: 6px; padding: 0.05rem 0.4rem; margin-top: 0.15rem; flex: none; }
+  .checks .body { color: var(--ink-soft); }
+  .checks .body b { color: var(--ink); }
+
+  /* ---- talk track ---- */
+  .quotes { display: flex; flex-direction: column; gap: 1rem; }
+  .quote {
+    font-family: var(--font-display); font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+    line-height: 1.4; color: var(--ink); padding-left: 1.1rem;
+    border-left: 3px solid var(--green);
+  }
+
+  /* ---- the ask ---- */
+  .ask {
+    background: var(--green); color: #eef4ef; border-radius: 14px;
+    padding: clamp(1.5rem, 3.5vw, 2.25rem);
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .ask h2 { color: #fff; }
+  .ask .eyebrow { color: #a9cbbc; }
+  .ask p { color: #d5e4db; max-width: var(--measure); }
+  .ask strong { color: #fff; }
+  .ask .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+  .ask .step { border-top: 1px solid rgba(255,255,255,0.22); padding-top: 0.8rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .ask .step .n { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; color: #a9cbbc; }
+  .ask .step .t { color: #fff; font-weight: 600; font-size: 0.98rem; }
+  .ask .step .d { color: #cadfd2; font-size: 0.85rem; }
+
+  .note { font-size: 0.82rem; color: var(--ink-faint); font-style: italic; }
+  .foot { border-top: 1px solid var(--line-strong); padding-top: 1.25rem; color: var(--ink-faint); font-size: 0.82rem; display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .rise { opacity: 0; transform: translateY(10px); animation: rise 0.6s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .rise:nth-child(2) { animation-delay: 0.06s; }
+  .rise:nth-child(3) { animation-delay: 0.12s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .rise { animation: none; opacity: 1; transform: none; } }
+</style>
+
+<div class="page">
+  <div class="doc">
+
+    <header class="rise">
+      <div class="titleblock">
+        <span class="eyebrow">Impact Desk · Sales Enablement · Internal</span>
+        <h1>What it takes to run this on real data</h1>
+        <p class="lede">The dashboard is built and working today on sample data. Going live with a
+          client's real influencers comes down to <strong>one dependency</strong>: a licensed data
+          feed. This brief explains that dependency in plain terms — and how to sell around it.</p>
+      </div>
+      <div class="meta">
+        <span>Prepared for <b>Rob Rusche</b></span>
+        <span>Date <b>Jul 6, 2026</b></span>
+        <span>Re: <b>Influencer Impact Dashboard (MVP)</b></span>
+      </div>
+    </header>
+
+    <section class="rise">
+      <div class="prose" style="display:flex; flex-direction:column; gap:1rem;">
+        <h2>What the product does, in one breath</h2>
+        <p>It ranks influencers by their <strong>typical</strong> post performance — the median — instead
+          of the average. That matters because averages lie: an account with nine dead posts and one
+          viral hit <em>averages</em> 100,000 views but is not a real influencer. The dashboard sees
+          through that, ranks the genuinely consistent performers first, and flags the inflated ones as
+          <strong>outlier-driven</strong>. It replaces the client's 50-tab spreadsheet with something a
+          non-technical operator — and their clients — can actually read.</p>
+      </div>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">1</span><h2>Readiness at a glance</h2></div>
+      <p class="prose">Almost everything is done. The board below is the honest status — five parts built
+        and working, one part waiting on a business decision.</p>
+      <div class="board">
+        <div class="cell"><span class="k">Ranking engine (median-first)</span><span class="status ready">Built</span></div>
+        <div class="cell"><span class="k">Dashboards &amp; charts</span><span class="status ready">Built</span></div>
+        <div class="cell"><span class="k">Operator &amp; client views</span><span class="status ready">Built</span></div>
+        <div class="cell"><span class="k">Manual / CSV data entry</span><span class="status ready">Built</span></div>
+        <div class="cell"><span class="k">CSV export</span><span class="status ready">Built</span></div>
+        <div class="cell"><span class="k">Live data feed (vendor)</span><span class="status pending">Decision</span></div>
+      </div>
+      <p class="note">“Built” means running now and demoable on realistic sample data. The single
+        pending item is not engineering work — it's choosing and paying for a data source.</p>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">2</span><h2>The one dependency</h2></div>
+      <div class="keystone">
+        <span class="label tag">The thing standing between demo and go-live</span>
+        <h3 style="font-size:1.35rem;">A provider that gives us, per influencer, the last ~20 posts with
+          a <span style="color:var(--clay);">view count on every post</span>.</h3>
+        <p style="color:var(--ink-soft); max-width:var(--measure);">Social platforms deliberately make
+          this data hard to get, and scraping them violates their terms. The industry answer is a
+          third-party <strong>data aggregator</strong> that licenses this information and exposes it
+          through an API. The app was built specifically so that feed plugs in without rebuilding
+          anything — it's a swap, not a project.</p>
+        <p style="color:var(--ink-soft); max-width:var(--measure);"><strong>Why views specifically:</strong>
+          median <em>views</em> per post is the headline ranking number. Likes and comments are useful,
+          but a provider that can't deliver per-post views can't power this product — so that's the one
+          field to confirm before signing anything.</p>
+      </div>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">3</span><h2>Exactly what a vendor must deliver</h2></div>
+      <p class="prose">In plain terms — this is the checklist to hand a prospective data provider. Looked
+        up by public handle, no cooperation from the influencer required.</p>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>What we need</th><th>Priority</th><th>What it's for</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="field">Views — per post, last ~20</span></td><td><span class="pri crit">Deal-breaker</span></td><td>The primary ranking number (median views)</td></tr>
+            <tr><td><span class="field">Likes — per post</span></td><td><span class="pri high">Important</span></td><td>Engagement &amp; engagement-rate metrics</td></tr>
+            <tr><td><span class="field">Comments — per post</span></td><td><span class="pri high">Important</span></td><td>Engagement calculation</td></tr>
+            <tr><td><span class="field">Post date</span></td><td><span class="pri high">Important</span></td><td>Selecting the “last 20” posts</td></tr>
+            <tr><td><span class="field">Follower count</span></td><td><span class="pri high">Important</span></td><td>Macro / micro / nano tier split</td></tr>
+            <tr><td><span class="field">Shares — per post</span></td><td><span class="pri opt">Nice to have</span></td><td>Sharpens the engagement number</td></tr>
+            <tr><td><span class="field">Post ID + display name</span></td><td><span class="pri opt">Nice to have</span></td><td>Clean refreshes &amp; nicer labels</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Everything else the dashboard shows — medians, averages, engagement rate, the
+        “who's real” flag — the app calculates itself. We don't need the vendor to score anything.</p>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">4</span><h2>The vendor landscape</h2></div>
+      <p class="prose">A shortlist from market research. Figures are <strong>rough public estimates, not
+        quotes</strong> — real pricing comes from a conversation with each vendor.</p>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>Vendor</th><th>Est. annual cost</th><th>Fit for us</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Modash</strong> (Raw API)</td>
+              <td class="nums">~$10k+</td>
+              <td><span class="fit-best">Best fit.</span> Returns live per-post metrics for any public profile — matches our need most directly. Start here.</td>
+            </tr>
+            <tr>
+              <td><strong>CreatorDB</strong></td>
+              <td>Quote-based</td>
+              <td>Cheaper; strong historical data. Confirm per-post <em>view</em> depth in a trial.</td>
+            </tr>
+            <tr>
+              <td><strong>Click Analytic</strong></td>
+              <td class="nums">Pay-per-call</td>
+              <td>Priced per lookup — attractive for low volume. Verify per-post views.</td>
+            </tr>
+            <tr>
+              <td><strong>Phyllo</strong> &amp; consent-based APIs</td>
+              <td>—</td>
+              <td><span class="fit-no">Wrong model.</span> Requires each influencer to log in and connect their own account. We evaluate influencers the client <em>doesn't</em> manage, so this doesn't apply.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">5</span><h2>The compliance story — for client conversations</h2></div>
+      <div class="prose" style="display:flex; flex-direction:column; gap:1rem;">
+        <p>Terms-of-use worry came up on the call. Here's the honest, reassuring version to give a client:
+          the product <strong>never scrapes</strong> TikTok, Instagram, or YouTube. It uses
+          <strong>licensed data from a third-party aggregator</strong> — the compliant, industry-standard
+          route. That's precisely how it stays within “the letter and spirit” of the platforms' terms
+          while still getting the numbers the client needs.</p>
+        <p class="note">One caveat to keep internal: data licensing is ultimately the vendor's
+          responsibility, so we confirm each vendor's compliance posture as part of selecting them — it's
+          on the decision list below, not left to chance.</p>
+      </div>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">6</span><h2>Open decisions — business, not engineering</h2></div>
+      <p class="prose">Four calls the team (with the client) needs to make. None of them block the demo;
+        all of them are needed before go-live.</p>
+      <ul class="checks">
+        <li><span class="marker">A</span><span class="body"><b>Pick a data vendor &amp; approve the budget.</b> Ballpark ~$10k/year. This is the gating decision.</span></li>
+        <li><span class="marker">B</span><span class="body"><b>Confirm the “engagement” definition</b> with the operator — likes + comments + shares, or a weighted version. It's adjustable in the app; we just need his preference.</span></li>
+        <li><span class="marker">C</span><span class="body"><b>Set the macro-vs-micro follower thresholds.</b> Where does “micro” end and “macro” begin for this client's world?</span></li>
+        <li><span class="marker">D</span><span class="body"><b>Name the target platforms &amp; a few real influencers</b> to use for the trial below.</span></li>
+      </ul>
+    </section>
+
+    <section class="rise">
+      <div class="sec-head"><span class="sec-num">7</span><h2>What you can say today</h2></div>
+      <div class="quotes">
+        <p class="quote">“The dashboard is built and working — I can show it to you live right now on sample data.”</p>
+        <p class="quote">“To switch to your real influencers, we plug in a licensed data feed. No scraping, fully within the platforms' terms.”</p>
+        <p class="quote">“One short, low-cost trial confirms the data covers your influencers — then we're live.”</p>
+      </div>
+    </section>
+
+    <div class="ask rise">
+      <span class="eyebrow">Recommended next step</span>
+      <h2>Run one paid vendor trial before committing</h2>
+      <p>Don't sign an annual contract on faith. A <strong>2–4 week paid trial with one vendor</strong>
+        (recommend Modash) against <strong>~10 real handles</strong> the client cares about confirms the
+        single thing that matters — per-post view coverage on their platforms. Low cost, and it de-risks
+        the entire build before any big spend.</p>
+      <div class="steps">
+        <div class="step"><span class="n">STEP 1</span><span class="t">Pick 10 real influencers</span><span class="d">On the client's target platforms.</span></div>
+        <div class="step"><span class="n">STEP 2</span><span class="t">Trial one vendor</span><span class="d">Check: does every post return views, likes, comments, date?</span></div>
+        <div class="step"><span class="n">STEP 3</span><span class="t">Confirm &amp; commit</span><span class="d">Coverage good → sign &amp; go live. Gaps → try the next vendor.</span></div>
+      </div>
+    </div>
+
+    <div class="foot rise">
+      <span>Impact Desk — internal sales brief. Prototype runs today on sample data; figures are market estimates pending vendor quotes.</span>
+      <span>Questions on the technical side → the build team. This document covers the business decisions only.</span>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

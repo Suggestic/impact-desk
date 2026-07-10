@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+
+# Local Claude Code settings (machine-specific)
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.db
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Secrets / local env
+.env
+*.local

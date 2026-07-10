@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Editorial data-desk theme. Warm paper + ink, one vermilion accent
+ * reserved for the "outlier-driven" (fake reach) signal, one green for
+ * genuinely consistent influencers. Serif display, grotesque data.
+ * ------------------------------------------------------------------ */
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: #f7f3ec;
+  --color-paper-raised: #fffdf8;
+  --color-ink: #1c1a15;
+  --color-ink-soft: #55503f;
+  --color-ink-faint: #8a8472;
+  --color-line: #e4ddcf;
+  --color-line-strong: #d3c9b5;
+
+  --color-accent: #b23a24;      /* vermilion — outlier / "not real" */
+  --color-accent-soft: #f2ded6;
+  --color-real: #4f6f4a;        /* moss — consistent / "real" */
+  --color-real-soft: #e2e9dc;
+  --color-gold: #a97e2f;        /* median highlight in charts */
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* Faint paper grain for depth without noise. */
+  background-image:
+    radial-gradient(circle at 15% 12%, rgba(180, 160, 120, 0.05), transparent 40%),
+    radial-gradient(circle at 85% 8%, rgba(120, 140, 110, 0.04), transparent 35%);
+  background-attachment: fixed;
+}
+
+/* Tabular, lining numerals everywhere numbers are ranked or compared. */
+.nums {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  animation: riseIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper-raised);
+}

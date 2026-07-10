@@ -1,0 +1,14 @@
+# Core (metric engine + data model need only SQLAlchemy)
+SQLAlchemy>=2.0,<3.0
+
+# API layer
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+python-multipart>=0.0.9   # CSV file upload endpoint
+
+# Postgres / Supabase driver (SQLite is built into Python for the prototype)
+psycopg[binary]>=3.2
+
+# Dev / test
+pytest>=8.0
